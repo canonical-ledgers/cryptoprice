@@ -1,3 +1,8 @@
+// github.com/canonical-ledgers/cryptoprice v1.0.0
+// Copyright 2018 Canonical Ledgers, LLC. All rights reserved.
+// Use of this source code is governed by the MIT license that can be found in
+// the LICENSE file distributed with this source code.
+
 package cryptoprice_test
 
 import (
