@@ -3,9 +3,10 @@ go:
 - 1.10.x
 - 1.11
 before_install:
+- apt-get install moreutils
 - go get -u github.com/mattn/goveralls
 script:
-- go test -coverprofile=coverage.out | grep -E 'PASS|$'
+- go test -coverprofile=coverage.out | pee cat 'grep -q PASS'
 - goveralls -service=travis-ci -coverprofile=coverage.out
 git:
   depth: 1
