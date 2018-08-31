@@ -3,7 +3,7 @@ go:
 - 1.10.x
 - 1.11
 before_install:
-- apt-get install moreutils
+- sudo apt-get install moreutils
 - go get -u github.com/mattn/goveralls
 script:
 - go test -coverprofile=coverage.out | pee cat 'grep -q PASS'
