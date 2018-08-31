@@ -101,11 +101,14 @@ func (c Client) GetPrice(t time.Time) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
+	if resp.StatusCode != http.StatusOK {
+		return 0, fmt.Errorf(resp.Status)
+	}
+
 	d := json.NewDecoder(resp.Body)
 	if err := d.Decode(&response); err != nil {
 		return 0, err
 	}
-
 	switch r := response.(type) {
 	case map[string]interface{}:
 		if v, ok := r[c.ToSymbol]; ok {
