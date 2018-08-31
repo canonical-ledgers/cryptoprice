@@ -5,7 +5,7 @@ go:
 before_install:
 - go get -u github.com/mattn/goveralls
 script:
-- go test -coverprofile=coverage.out -key $KEY -secret $SECRET | grep -E 'PASS|$'
+- go test -coverprofile=coverage.out | grep -E 'PASS|$'
 - goveralls -service=travis-ci -coverprofile=coverage.out
 git:
   depth: 1
