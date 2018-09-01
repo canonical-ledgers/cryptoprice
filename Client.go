@@ -128,7 +128,7 @@ func (c Client) GetPrice(t time.Time) (float64, error) {
 		var pID int
 		minDuration := time.Duration(math.MaxInt64)
 		for i, p := range r.Data {
-			duration := t.Sub(p.Time)
+			duration := t.Sub(time.Time(p.Time))
 			if duration < minDuration {
 				minDuration = duration
 				pID = i
@@ -148,7 +148,22 @@ type historicalResponseT struct {
 }
 
 type priceT struct {
-	Time time.Time
+	Time timeT
 	High float64
 	Low  float64
+}
+
+type timeT time.Time
+
+func (t *timeT) UnmarshalJSON(data []byte) error {
+	var timestamp int64
+	if err := json.Unmarshal(data, &timestamp); err != nil {
+		return err
+	}
+	*t = timeT(time.Unix(timestamp, 0))
+	return nil
+}
+
+func (t timeT) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf("%v", time.Time(t).Unix())), nil
 }

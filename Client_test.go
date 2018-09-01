@@ -76,11 +76,11 @@ var handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		resp = historicalResponseT{
 			Response: "Success",
 			Data: []priceT{{
-				Time: ts.Add(-1 * time.Minute),
+				Time: timeT(ts.Add(-1 * time.Minute)),
 				High: 5,
 				Low:  4,
 			}, {
-				Time: ts,
+				Time: timeT(ts),
 				High: 6,
 				Low:  5,
 			}},
