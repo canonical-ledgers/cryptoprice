@@ -8,3 +8,7 @@ A simple Client for querying the most accurate price for a given currency pair
 and time from the CryptoCompare REST API.
 
 See GoDoc for complete documentation.
+
+## CLI
+The `./cmd` directory contains a simple CLI program for querying a price using
+this package.
