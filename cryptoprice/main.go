@@ -33,7 +33,7 @@ func main() {
 
 	c := cryptoprice.NewClient(strings.ToUpper(fromSymbol), strings.ToUpper(toSymbol))
 	c.Timeout = timeout
-	p, err := c.GetPrice(dt)
+	p, err := c.GetPriceAt(dt)
 	if err != nil {
 		log.Fatalf("error: %#v\n", err)
 	}

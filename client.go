@@ -16,60 +16,71 @@ import (
 
 // Default URIs and parameters
 const (
-	CryptoCompareURL = "https://min-api.cryptocompare.com/data"
-	NowURI           = "/price"
-	MinuteURI        = "/histominute"
-	HourURI          = "/histohour"
-	ExtraParams      = "golang pkg - github.com/canonical-ledgers/cryptoprice"
+	CryptoCompareURL   = "https://min-api.cryptocompare.com/data"
+	NowURI             = "/price"
+	MinuteURI          = "/histominute"
+	HourURI            = "/histohour"
+	DefaultExtraParams = "golang pkg - github.com/canonical-ledgers/cryptoprice"
 )
 
 // Client stores request parameters and provides methods for querying the
 // CryptoCompare REST API. You may set any additional http.Client settings
 // directly on this type.
 type Client struct {
-	URL           string // URL to send requests to
-	FromSymbol    string // Cryptocurrency symbol of interest
-	ToSymbol      string // Currency symbol to convert into
-	TryConversion bool   // Set to false to only return data if a direct pair is available
-	Exchange      string // Exchange to use for data (default: "CCCAGG" aggregated average)
-	ExtraParams   string // Name of your application, defaults to const ExtraParams
+	URL string
+
+	// Get price of Currency in Units.
+	Currency string
+	Units    string
+
+	// Only return data for direct trading pairs. Do not perform conversions.
+	DirectPairOnly bool
+
+	// Exchange to use for data (default: "CCCAGG" aggregated average)
+	Exchange string
+
+	// ExtraParams should be the name of your application, defaults to
+	// const DefaultExtraParams
+	ExtraParams string
 	http.Client
 }
 
-// NewClient returns a pointer to a new Client with the given FromSymbol and
-// ToSymbol set, as well as the correct CryptoCompare API endpoint URL,
-// TryConversion set to true, and the default ExtraParams set.
-func NewClient(fromSymbol, toSymbol string) *Client {
+// NewClient returns a pointer to a new Client with the given Currency and
+// Units set, as well as the correct CryptoCompare API endpoint URL.
+func NewClient(currency, units string) *Client {
 	return &Client{
-		FromSymbol:    fromSymbol,
-		ToSymbol:      toSymbol,
-		TryConversion: true,
-		URL:           CryptoCompareURL,
-		ExtraParams:   ExtraParams,
+		Currency:    currency,
+		Units:       units,
+		URL:         CryptoCompareURL,
+		ExtraParams: DefaultExtraParams,
 	}
 }
 
-// GetPrice returns the most accurate price available for the given time t. If
-// the requested time is within the past minute, the most recent price data is
-// used. If the requested time is within the past 7 days, the simple average of
-// the high and low prices for the minute that is closest to the given time is
-// used. If the request time is any further in the past, the simple average of
-// the high and low prices for the hour that is closest to the given price is
-// used.
-func (c Client) GetPrice(t time.Time) (float64, error) {
-	if len(c.FromSymbol) == 0 || len(c.ToSymbol) == 0 {
-		return 0, fmt.Errorf("FromSymbol and ToSymbol not specified")
+func (c *Client) GetPriceNow() (float64, error) {
+	return c.GetPriceAt(time.Now())
+}
+
+// GetPriceAt returns the most accurate price available for the given time t.
+// If the requested time is within the past minute, the most recent price data
+// is used. If the requested time is within the past 7 days, the simple average
+// of the high and low prices for the minute that is closest to the given time
+// is used. If the request time is any further in the past, the simple average
+// of the high and low prices for the hour that is closest to the given price
+// is used.
+func (c *Client) GetPriceAt(t time.Time) (float64, error) {
+	if len(c.Currency) == 0 || len(c.Units) == 0 {
+		return 0, fmt.Errorf("Currency and Units not specified")
 	}
 	values := make(url.Values)
-	values.Add("fsym", c.FromSymbol)
+	values.Add("fsym", c.Currency)
 	if len(c.ExtraParams) > 0 {
 		values.Add("extraParams", c.ExtraParams)
 	}
 	if len(c.Exchange) > 0 {
 		values.Add("e", c.Exchange)
 	}
-	if !c.TryConversion {
-		values.Add("tryConversion", fmt.Sprintf("%v", c.TryConversion))
+	if c.DirectPairOnly {
+		values.Add("tryConversion", "false")
 	}
 
 	var response interface{}
@@ -83,11 +94,11 @@ func (c Client) GetPrice(t time.Time) (float64, error) {
 		roundUp = time.Minute
 	}
 	if since < 1*time.Minute {
-		values.Add("tsyms", c.ToSymbol)
+		values.Add("tsyms", c.Units)
 		URI = NowURI
 		response = make(map[string]interface{})
 	} else {
-		values.Add("tsym", c.ToSymbol)
+		values.Add("tsym", c.Units)
 		values.Add("toTs", fmt.Sprintf("%v",
 			t.Truncate(roundUp).Add(roundUp).Unix()))
 		values.Add("limit", fmt.Sprintf("%v", 1))
@@ -111,7 +122,7 @@ func (c Client) GetPrice(t time.Time) (float64, error) {
 	}
 	switch r := response.(type) {
 	case map[string]interface{}:
-		if v, ok := r[c.ToSymbol]; ok {
+		if v, ok := r[c.Units]; ok {
 			if v, ok := v.(float64); ok {
 				return v, nil
 			}

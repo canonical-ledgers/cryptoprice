@@ -29,12 +29,12 @@ func TestGetPrice(t *testing.T) {
 	_, err := client.GetPrice(time.Now())
 	assert.Error(err, "Empty FromSymbol")
 
-	client.FromSymbol = "BTC"
-	client.ToSymbol = ""
+	client.Currency = "BTC"
+	client.Units = ""
 	_, err = client.GetPrice(time.Now())
 	assert.Error(err, "Empty ToSymbol")
 
-	client.ToSymbol = "USD"
+	client.Units = "USD"
 	msg := "GetPrice(time.Now())"
 	p, err := client.GetPrice(time.Now())
 	require.NoError(err, msg)
