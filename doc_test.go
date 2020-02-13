@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/canonical-ledgers/cryptoprice"
+	"github.com/canonical-ledgers/cryptoprice/v2"
 )
 
 func ExampleClient_GetPrice() {

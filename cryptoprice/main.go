@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/canonical-ledgers/cryptoprice"
+	"github.com/canonical-ledgers/cryptoprice/v2"
 )
 
 func main() {
