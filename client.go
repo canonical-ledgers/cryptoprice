@@ -1,4 +1,3 @@
-// github.com/canonical-ledgers/cryptoprice
 // Copyright 2018 Canonical Ledgers, LLC. All rights reserved.
 // Use of this source code is governed by the MIT license that can be found in
 // the LICENSE file distributed with this source code.
@@ -8,6 +7,7 @@ package cryptoprice
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math"
 	"net/http"
 	"net/url"
@@ -42,6 +42,9 @@ type Client struct {
 	// ExtraParams should be the name of your application, defaults to
 	// const DefaultExtraParams
 	ExtraParams string
+
+	APIKey string
+
 	http.Client
 }
 
@@ -82,6 +85,9 @@ func (c *Client) GetPriceAt(t time.Time) (float64, error) {
 	if c.DirectPairOnly {
 		values.Add("tryConversion", "false")
 	}
+	if len(c.APIKey) > 0 {
+		values.Add("api_key", c.APIKey)
+	}
 
 	var response interface{}
 	response = &historicalResponseT{}
@@ -116,9 +122,13 @@ func (c *Client) GetPriceAt(t time.Time) (float64, error) {
 		return 0, fmt.Errorf(resp.Status)
 	}
 
-	d := json.NewDecoder(resp.Body)
-	if err := d.Decode(&response); err != nil {
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
 		return 0, err
+	}
+
+	if err := json.Unmarshal(data, &response); err != nil {
+		return 0, fmt.Errorf("%w: Body: %v", err, string(data))
 	}
 	switch r := response.(type) {
 	case map[string]interface{}:
