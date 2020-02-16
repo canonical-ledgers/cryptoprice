@@ -12,10 +12,10 @@ import (
 	"github.com/canonical-ledgers/cryptoprice/v2"
 )
 
-func ExampleClient_GetPrice() {
+func ExampleClient_GetPriceAt() {
 	client := cryptoprice.NewClient("BTC", "USD")
 	client.Timeout = 5 * time.Second
-	p, err := client.GetPrice(time.Now())
+	p, err := client.GetPriceAt(time.Now())
 	if err != nil {
 		fmt.Printf("error: %v\n", err)
 	}

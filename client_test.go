@@ -18,7 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGetPrice(t *testing.T) {
+func TestGetPriceAt(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 	reqT = t
@@ -26,29 +26,29 @@ func TestGetPrice(t *testing.T) {
 
 	client := NewClient("", "USD")
 	client.URL = testServer.URL
-	_, err := client.GetPrice(time.Now())
+	_, err := client.GetPriceAt(time.Now())
 	assert.Error(err, "Empty FromSymbol")
 
 	client.Currency = "BTC"
 	client.Units = ""
-	_, err = client.GetPrice(time.Now())
+	_, err = client.GetPriceAt(time.Now())
 	assert.Error(err, "Empty ToSymbol")
 
 	client.Units = "USD"
-	msg := "GetPrice(time.Now())"
-	p, err := client.GetPrice(time.Now())
+	msg := "GetPriceAt(time.Now())"
+	p, err := client.GetPriceAt(time.Now())
 	require.NoError(err, msg)
 	assert.Equal(5.5, p, msg)
 	assert.Equal(reqURL.Path, NowURI, msg)
 
-	msg = "GetPrice(time.Now().Add(-2 * time.Minute))"
-	p, err = client.GetPrice(time.Now().Add(-2 * time.Minute))
+	msg = "GetPriceAt(time.Now().Add(-2 * time.Minute))"
+	p, err = client.GetPriceAt(time.Now().Add(-2 * time.Minute))
 	require.NoError(err, msg)
 	assert.Equal(5.5, p, msg)
 	assert.Equal(reqURL.Path, MinuteURI, msg)
 
-	msg = "GetPrice(time.Now().Add(-8 * 24 * time.Hour))"
-	p, err = client.GetPrice(time.Now().Add(-8 * 24 * time.Hour))
+	msg = "GetPriceAt(time.Now().Add(-8 * 24 * time.Hour))"
+	p, err = client.GetPriceAt(time.Now().Add(-8 * 24 * time.Hour))
 	require.NoError(err, msg)
 	assert.Equal(5.5, p, msg)
 	assert.Equal(reqURL.Path, HourURI, msg)
